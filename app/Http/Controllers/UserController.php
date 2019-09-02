@@ -46,7 +46,7 @@ class UserController extends Controller
 
 	    		//validacion
 	    		//Cifrar la contraseña
-    			$pwd = password_hash($params->password, PASSWORD_BCRYPT, ['cost' => 4]);  			
+    			$pwd = hash('sha256', $params->password);  			
     	
     			//Crear el usuario
 
@@ -86,9 +86,58 @@ class UserController extends Controller
 
     public function login(Request $request) {
 
-    	$name = $request->input('name');
-    	$surname = $request->input('surname');
+    	$jwtAuth = new \JwtAuth();
 
-    	return "Accion de login de usuarios: $name $surname";
+        //<Login usuario>
+        
+        //Recibir datos por POST
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+
+        //Validar datos
+        $validate = \Validator::make($params_array, [
+                'correo'    => 'required|email',//Comprobar si el usuario existe ya users es la tabla en la bd
+                'password'  => 'required'
+            ]);
+
+        if ($validate->fails()) {
+            //Validacion ha fallado
+            $signup = array(
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'El suaurio no se ha podido validar'
+                );
+        }else{
+
+            //Cifrar contraseña
+            $pwd = hash('sha256', $params->password);
+
+            //Devolver token o datos
+            $signup = $jwtAuth->signup($params->correo, $pwd);
+
+                if (!empty($params->gettoken)) {
+                    $signup = $jwtAuth->signup($params->email, $pwd, true);
+                }
+        }
+        
+        
+
+    	return response()->json($signup,200);
+    }
+
+    public function update(Request $request) {
+
+        $token = $request->header('Authorization');
+        $jwtAuth = new \JwtAuth();
+        $checkToken = $jwtAuth->checkToken($token);
+
+        if ($checkToken) {
+            echo "<h1>Login correcto</h1>";
+        }else{
+            echo "<h1>Login incorrecto</h1>";
+        }
+        
+        die();
     }
 }
