@@ -17,7 +17,7 @@
 		public function signup($email, $password, $getToken = null){
 			//Buscar si existe el usuario con sus credenciales
 			$user = User::where([
-					'correo' => $email,
+					'email' => $email,
 					'password' => $password
 			])->first();
 
@@ -32,9 +32,9 @@
 				
 				$token = array(
 					'sub'      => $user->id,
-					'email'    => $user->correo,
-					'name'     => $user->nombre,
-					'surname'  => $user->apellidos,
+					'email'    => $user->email,
+					'name'     => $user->name,
+					'surname'  => $user->surname,
 					'iat'      => time(),
 					'exp'	   => time() + (7 * 24 * 60 * 60)
 				);

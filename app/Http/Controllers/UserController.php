@@ -26,10 +26,10 @@ class UserController extends Controller
 	    	//Validar datos
 	    	
 	    	$validate = \Validator::make($params_array, [
-	    		'nombre'    => 'required|alpha',
-	    		'apellidos' => 'required|alpha',
-	    		'telefono'  => 'required',
-	    		'correo'    => 'required|email|unique:users',//Comprobar si el usuario existe ya users es la tabla en la bd
+	    		'name'    => 'required|alpha',
+	    		'surname' => 'required|alpha',
+	    		'phone'  => 'required',
+	    		'email'    => 'required|email|unique:users',//Comprobar si el usuario existe ya users es la tabla en la bd
 	    		'password'  => 'required'
 	    	]);
 
@@ -51,10 +51,10 @@ class UserController extends Controller
     			//Crear el usuario
 
     			$user = new User();
-    			$user->nombre    = $params_array['nombre'];
-    			$user->apellidos = $params_array['apellidos'];
-    			$user->telefono = $params_array['telefono'];
-    			$user->correo    = $params_array['correo'];
+    			$user->name    = $params_array['name'];
+    			$user->surname = $params_array['surname'];
+    			$user->phone = $params_array['phone'];
+    			$user->email    = $params_array['email'];
     			$user->password  = $pwd;
     			$user->rol       = $params_array['rol'];
 
@@ -97,7 +97,7 @@ class UserController extends Controller
 
         //Validar datos
         $validate = \Validator::make($params_array, [
-                'correo'    => 'required|email',//Comprobar si el usuario existe ya users es la tabla en la bd
+                'email'    => 'required|email',//Comprobar si el usuario existe ya users es la tabla en la bd
                 'password'  => 'required'
             ]);
 
@@ -106,7 +106,7 @@ class UserController extends Controller
             $signup = array(
                 'status' => 'error',
                 'code' => 404,
-                'message' => 'El suaurio no se ha podido validar'
+                'message' => 'El usuario no se ha podido validar'
                 );
         }else{
 
@@ -114,7 +114,7 @@ class UserController extends Controller
             $pwd = hash('sha256', $params->password);
 
             //Devolver token o datos
-            $signup = $jwtAuth->signup($params->correo, $pwd);
+            $signup = $jwtAuth->signup($params->email, $pwd);
 
                 if (!empty($params->gettoken)) {
                     $signup = $jwtAuth->signup($params->email, $pwd, true);
@@ -132,12 +132,51 @@ class UserController extends Controller
         $jwtAuth = new \JwtAuth();
         $checkToken = $jwtAuth->checkToken($token);
 
-        if ($checkToken) {
-            echo "<h1>Login correcto</h1>";
+
+        //Recoger datos por post
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        if ($checkToken && !empty($params_array)) {
+            //Actualizar usuario
+            
+            //Sacar usuario identificado
+            $user = $jwtAuth->checkToken($token, true);
+
+            //Validar los datos
+            $validate = \Validator::make($params_array, [
+                'name'    => 'required|alpha',
+                'surname' => 'required|alpha',
+                'email'    => 'required|email|unique:users,'.$user->sub
+            ]);
+
+            //Quitar campos que no quiero actualizar
+            unset($params_array['id']);
+            unset($params_array['role']);
+            unset($params_array['password']);
+            unset($params_array['created_at']);
+            unset($params_array['remember_token']);
+
+           //Actualizar usuario en bd
+           $user_update = User::where('id', $user->sub)->update($params_array);
+            
+            //Devolver array con usuario
+             $data = array(
+                'code' => 200,
+                'status' => 'success',
+                'message' => $user,
+                'changes' => $params_array
+            );
+            
+
         }else{
-            echo "<h1>Login incorrecto</h1>";
+            $data = array(
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'El usuario no esta identificado.'
+            );
         }
         
-        die();
+        return response()->json($data, $data['code']);
     }
 }
