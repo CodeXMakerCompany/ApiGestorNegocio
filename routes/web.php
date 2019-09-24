@@ -11,6 +11,9 @@
 |
 */
 
+//Cargando clases
+use App\Http\Middleware\ApiAuthMiddleware;
+
 //rutas de prueba
 Route::get('/', function () {
     return view('welcome');
@@ -34,6 +37,10 @@ Route::get('test', 'pruebasController@testOrm');
 	//Rutas del controlador del usuario
 	Route::post('/api/register', 'UserController@register');
 	Route::post('/api/login', 'UserController@login');
-	//Metodo http para actualizar registros
-	Route::put('/api/update', 'UserController@update');
 
+	//Metodo http para actualizar registros
+	Route::put('/api/user/update', 'UserController@update');
+	Route::post('/api/user/upload', 'UserController@upload')->middleware(ApiAuthMiddleware::class);
+
+	Route::get('/api/user/avatar/{filename}', 'UserController@getImage');
+	Route::get('/api/user/detail/{id}', 'UserController@detail');
