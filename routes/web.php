@@ -44,3 +44,9 @@ Route::get('test', 'pruebasController@testOrm');
 
 	Route::get('/api/user/avatar/{filename}', 'UserController@getImage');
 	Route::get('/api/user/detail/{id}', 'UserController@detail');
+
+	//Rutas del controlador de habitaciones
+	 /*Ruta de tipo resource !*/
+	Route::resource('/api/habitacion', 'HabitacionController'); 
+
+	

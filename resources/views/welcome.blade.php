@@ -81,8 +81,26 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    Laravels
                 </div>
+
+                @php
+                    
+                echo "<h1>Tareita</h1>";
+
+                for ($i = 1; $i <= 4 ; $i++){
+
+                $cm_3 = 250;
+                $precio = 5;
+                    $resultado = $cm_3*$i;
+                    $valor = $precio*$i; 
+                   echo $resultado." ml | "."Su precio es:"."=".$valor."mxn"."<br>"; 
+                }
+                    
+                    
+                
+
+                @endphp
 
                 <div class="links">
                     <a href="https://laravel.com/docs">Docs</a>
