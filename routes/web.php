@@ -49,4 +49,10 @@ Route::get('test', 'pruebasController@testOrm');
 	 /*Ruta de tipo resource !*/
 	Route::resource('/api/habitacion', 'HabitacionController'); 
 
+	//Rutas del controlador de productos
+	 /*Ruta de tipo resource !*/
+	Route::resource('/api/producto', 'ProductoController');
+	Route::post('/api/producto/upload', 'ProductoController@upload'); 
+	Route::get('/api/producto/image/{filename}', 'ProductoController@getImage');
+	Route::get('/api/producto/category/{id}', 'ProductoController@getProductsByCategory');
 	
